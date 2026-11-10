@@ -1,43 +1,29 @@
-# EIDF GPU cluster: quick-start for EIDF029
+# EIDF029 GPU cluster 
 
 How to run training jobs on the EIDF GPU service (Kubernetes) from the EIDF029 project VM:
-submit a job, watch its logs, get into the PVC, and stop runs cleanly.
+submit a job, watch its logs, get into the PVC, and stop runs.
 
 Everything here runs **from the project VM** (where `kubectl` is already configured).
-Our namespace is `eidf029ns` and the Kueue queue is `eidf029ns-user-queue`.
 
-```
-eidf-k8s-guide/
-├── config.env.example     # your settings (copy to config.env)
-├── templates/
-│   ├── gpu-job.yaml       # GPU training job
-│   └── pvc-browser.yaml   # tiny pod for looking inside your PVC
-├── scripts/               # wrappers around kubectl
-└── CHEATSHEET.md          # the raw kubectl commands
-```
+The namespace `eidf029ns` and the Kueue queue is `eidf029ns-user-queue`.
 
-## 1. Setup (once)
+## 1. Setup for any project 
 
 ```bash
-git clone <this-repo> && cd eidf-k8s-guide
+git clone <this-repo> && cd k8s
 cp config.env.example config.env
-kubectl -n eidf029ns get pvc        # find your PVC name
-nano config.env                     # set PVC_NAME (and GPU type/resources if needed)
+kubectl -n eidf029ns get pvc       
 chmod +x scripts/*.sh
 ```
 
-`config.env` is gitignored, so each person keeps their own.
-
-If `envsubst` is missing: `sudo apt install gettext-base`.
 
 ## 2. How it works
 
 - **Your code and data live on a PVC** (persistent volume). Pods are temporary;
   the PVC is what survives. Put your repo/data there and write outputs and checkpoints there.
-- **A Job** asks for a pod with a GPU. Kueue queues it until resources are free.
+- **A Job** asks for a pod with a GPU.  
 - The pod mounts the PVC at `MOUNT_PATH` (default `/mnt/data`) and runs your command from there.
-- When a job is deleted, its pod **and its logs** are deleted too. Save logs first
-  (the scripts do this for you).
+- When a job is deleted, its pod **and its logs** are deleted too. Save logs first 
 
 ## 3. Daily workflow
 
