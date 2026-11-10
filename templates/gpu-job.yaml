@@ -1,0 +1,52 @@
+# GPU training job. Don't submit this directly: use scripts/submit.sh,
+# which fills in the ${...} placeholders from config.env.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: ${EIDF_USER}-${JOB_NAME}-
+  labels:
+    kueue.x-k8s.io/queue-name: ${QUEUE}
+    eidf/user: ${EIDF_USER}
+spec:
+  backoffLimit: 0            # don't retry automatically if the script crashes
+  template:
+    metadata:
+      labels:
+        eidf/user: ${EIDF_USER}
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        nvidia.com/gpu.product: ${GPU_PRODUCT}
+      containers:
+      - name: main
+        image: ${IMAGE}
+        workingDir: ${MOUNT_PATH}
+        command: ["bash", "-c"]
+        args:
+        - |
+          ${CMD}
+        env:
+        - name: PYTHONUNBUFFERED   # print() shows up in the logs immediately
+          value: "1"
+        resources:
+          requests:
+            cpu: "${CPU}"
+            memory: ${MEMORY}
+            nvidia.com/gpu: ${GPU_COUNT}
+          limits:
+            cpu: "${CPU}"
+            memory: ${MEMORY}
+            nvidia.com/gpu: ${GPU_COUNT}
+        volumeMounts:
+        - name: data
+          mountPath: ${MOUNT_PATH}
+        - name: shm               # bigger shared memory for PyTorch DataLoader workers
+          mountPath: /dev/shm
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ${PVC_NAME}
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi

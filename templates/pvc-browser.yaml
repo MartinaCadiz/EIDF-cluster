@@ -1,0 +1,31 @@
+# Small CPU-only pod that mounts your PVC so you can look around / copy files.
+# Submit with:  scripts/browse-pvc.sh
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${EIDF_USER}-pvc-browser
+  labels:
+    kueue.x-k8s.io/queue-name: ${QUEUE}
+    eidf/user: ${EIDF_USER}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        eidf/user: ${EIDF_USER}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: browser
+        image: busybox
+        command: ["sleep", "infinity"]
+        resources:
+          requests: {cpu: "1", memory: 1Gi}
+          limits: {cpu: "1", memory: 1Gi}
+        volumeMounts:
+        - name: data
+          mountPath: ${MOUNT_PATH}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ${PVC_NAME}
