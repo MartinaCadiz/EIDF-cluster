@@ -1,19 +1,27 @@
 # EIDF029 GPU cluster 
 
-How to run training jobs on the EIDF GPU service (Kubernetes) from the EIDF029 project VM:
-submit a job, watch its logs, get into the PVC, and stop runs.
+How to run training jobs on the EIDF GPU service (Kubernetes) from the EIDF029 project VM.
 
 Everything here runs **from the project VM** (where `kubectl` is already configured).
 
 The namespace `eidf029ns` and the Kueue queue is `eidf029ns-user-queue`.
 
-## 1. Setup for any project 
+
+
+## 1. Setup my space
+The namespace `eidf029ns` and the Kueue queue is `eidf029ns-user-queue`.
 
 ```bash
-git clone <this-repo> && cd k8s
-cp config.env.example config.env
-kubectl -n eidf029ns get pvc       
-chmod +x scripts/*.sh
+export NS="eidf029ns"
+```
+
+Verify your queue exists:
+```bash
+kubectl -n "$NS" get localqueue
+```
+Expected:
+```bash
+eidf029ns-user-queue
 ```
 
 
