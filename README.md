@@ -72,7 +72,31 @@ Copy a file out to the VM (then open it in VS Code):
 kubectl -n eidf029ns cp <pod-name>:/mnt/data/path/to/file ./file
 ```
 
-## 5. Tips
+## 5. Interactive pods for using a jupyter notebook
+
+Start Jupyter (from ~/../eidf on the VM):
+```bash
+envsubst '$USER' < jupyter.yaml | kubectl create -n eidf029ns -f -
+```
+Check the pod
+```bash
+kubectl get pods -n eidf029ns | grep jupyter
+```
+For getting the token, wait until is running and then do:
+```bash
+kubectl logs <jupyter-pod-name> -n eidf029ns | grep token
+```
+Connect from your browser. You need two tunnels. On the VM, (1) leave this running:
+```bash
+kubectl port-forward pod/<jupyter-pod-name> 8888:8888 -n eidf029ns
+```
+(2) In a new terminal on your laptop, leave this open too:
+```bash
+ssh -L 8888:localhost:8888 eidf029-host26
+```
+
+
+## 6. Tips
 
 - **Write your own log file to the PVC** (e.g. `python train.py 2>&1 | tee runs/exp1.log`).
   `kubectl logs` loses everything before a restart, and very long logs get rotated.
@@ -83,7 +107,7 @@ kubectl -n eidf029ns cp <pod-name>:/mnt/data/path/to/file ./file
 - GPU type is set with `GPU_PRODUCT` in `config.env`. Check the EIDF docs for the current list
   (e.g. `NVIDIA-A100-SXM4-40GB`, `NVIDIA-A100-SXM4-80GB`, `NVIDIA-H100-80GB-HBM3`).
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 | Symptom | Likely cause / fix |
 |---|---|
