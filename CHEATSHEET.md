@@ -6,6 +6,7 @@ All commands use `-n eidf029ns`. Tip: `alias k='kubectl -n eidf029ns'` in your `
 ```bash
 kubectl -n eidf029ns get jobs
 kubectl -n eidf029ns get pods
+kubectl get jobs,pods -n eidf029ns | grep <name-of-the-pod>
 kubectl -n eidf029ns get pods -l eidf/user=$USER     # only yours
 kubectl -n eidf029ns get pvc
 kubectl -n eidf029ns describe pod <pod>              # events at the bottom: why it's Pending/failing
